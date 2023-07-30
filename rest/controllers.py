@@ -2,6 +2,7 @@ import logging
 from src.forms import feature_form 
 from src.interfaces import model
 from fastapi.responses import JSONResponse
+from fastapi.requests import Request
 
 rest_logger = logging.getLogger(__name__)
 
@@ -18,3 +19,9 @@ def predict_news_classification_tags(application_data: feature_form.NewsFeatureF
         content=predicted_tags,
         status_code=201,
     )
+
+def healthcheck(request: Request):
+    """
+    Standard Heatlhcheck REST-Endpoint
+    """
+    return JSONResponse(status_code=200)
