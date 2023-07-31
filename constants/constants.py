@@ -1,0 +1,1 @@
+MODEL_URL="../experiments/experiment_1/models/classifier.bin"

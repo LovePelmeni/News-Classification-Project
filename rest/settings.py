@@ -1,17 +1,25 @@
-import fastapi 
 import logging 
-import os
-from fastapi.middleware import cors
-
-
-
-import controllers
-from ..src import exceptions
-import exc_handlers
 
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler(filename="../logs/rest_settings.log")
 logger.addHandler(file_handler)
+
+try:
+    import fastapi 
+    import os
+    from fastapi.middleware import cors
+
+    import controllers
+    from ..src import exceptions
+    import exc_handlers
+    
+except(ImportError, ModuleNotFoundError) as err:
+    logger.error({
+        'msg': err
+    })
+    raise SystemExit(
+        "Some of the modules failed to be loaded, check logs for more information"
+    )
 
 # Environment Variables
 

@@ -1,0 +1,2 @@
+class PredictionFailed(BaseException):
+    pass

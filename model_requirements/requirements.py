@@ -1,0 +1,1 @@
+ACCURACY_SCORE = 0.8
