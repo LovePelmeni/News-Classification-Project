@@ -1,7 +1,8 @@
 import logging 
+import definitions
 
 logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler(filename="../logs/rest_settings.log")
+file_handler = logging.FileHandler(filename=definitions.LOGGING_DIRECTORY + "/settings.log")
 logger.addHandler(file_handler)
 
 try:

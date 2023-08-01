@@ -1,12 +1,12 @@
 import logging 
-from src.forms import feature_form 
-from src.interfaces import model
+from src.feature_form import feature_form 
+from src.feature_form import model
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 
 rest_logger = logging.getLogger(__name__)
 
-def predict_news_classification_tags(application_data: feature_form.NewsFeatureForm):
+def predict_news_classification_tags(application_data: feature_form.BaseFeatureForm):
     """
     Function reprensents main REST-Endpoint for handling prediction requests
     via HTTP Web Protocol, transfers input data to the model and returns predicted outcome

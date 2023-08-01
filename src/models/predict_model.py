@@ -1,12 +1,13 @@
 import logging 
-from ..feature_form import feature_form
-from ..exceptions import PredictionFailed
-import sys
+from src.feature_form import feature_form
+from src.exceptions import PredictionFailed
+
 import pickle
-from ...constants import constants
+from constants import constants
+import definitions
 
 Logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler(filename=sys.path[1] + "logs/models.log")
+file_handler = logging.FileHandler(filename=definitions.LOGGING_DIRECTORY + "/models.log")
 model = pickle.load(open(constants.MODEL_URL, mode='rb'))
 
 

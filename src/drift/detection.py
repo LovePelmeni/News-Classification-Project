@@ -2,32 +2,37 @@ import pandas
 from scipy import stats
 import collections 
 import typing
-from ...model_requirements import requirements
+from model_requirements import requirements
 
 def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> typing.Dict[str, int]:
     """
     Function compares 2 datasets and checks for potential drift 
     using statistical tests 
     """
-    if old_data.columns != new_data.columns:
+    if old_data.columns.to_list().sort() != new_data.columns.to_list().sort():
         raise ValueError("Datasets are not compatible")
     try:
-        driftmap = collections.defaultdict(str)
+        driftmap = collections.defaultdict(dict)
         for feature in new_data.columns:
 
-            if new_data[feature].dtype in ('category', 'str'):
+            if feature in new_data.select_dtypes(include='category').columns:
 
                 driftmap[feature]['p_value'] = compare_categorical_features(
                     old_f=old_data[feature],
                     new_f=new_data[feature]
                 )
 
-            elif new_data[feature].dtype.str.startswith(["int", "float", "uint"]):
+            elif feature in new_data.select_dtypes(include='number').columns:
 
                 driftmap[feature]['p_value'] = compare_numerical_features(
                     old_f=old_data[feature],
                     new_f=new_data[feature]
                 )
+                driftmap[feature]['variance'] = check_variance_distinction(
+                    old_f=old_data[feature],
+                    new_f=new_data[feature]
+                )
+                
             else:
                 driftmap[feature]['p_value'] = compare_boolean_features(
                     old_f=old_data[feature],

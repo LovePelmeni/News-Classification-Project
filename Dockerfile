@@ -16,6 +16,7 @@ COPY ./src ./src
 COPY ./proj_requirements/prod_requirements.txt ./
 COPY ./poetry.lock ./
 COPY ./pyproject.toml ./
+COPY ./definitions.py ./
 
 RUN pip install --upgrade pip 
 
@@ -24,5 +25,8 @@ RUN poetry install && poetry export --format=requirements.txt \\
 
 RUN pip install -r prod_requirements.txt && pip install 'fastapi[all]' --upgrade
 
+RUN chmod +x definitions.py
 RUN chmod +x entrypoint.sh
+
+RUN python definitions.py
 ENTRYPOINT ["sh", "entrypoint.sh"]
