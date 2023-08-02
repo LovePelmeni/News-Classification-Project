@@ -20,7 +20,7 @@ if [ $? -ne 0 ]; then
 
 echo "Running ASGI Server..."
 
-uvicorn rest/settings:application --host 0.0.0.0 --port 8080
+uvicorn rest.settings:application --host 0.0.0.0 --port 8080
 
 if [ $? -ne 0 ]; then 
     echo "Failed to start ASGI Server"

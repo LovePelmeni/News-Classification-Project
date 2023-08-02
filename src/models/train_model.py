@@ -6,10 +6,11 @@ from sklearn.metrics import make_scorer
 import typing 
 import logging 
 import sklearn.exceptions 
-from ... import definitions
+import definitions
 
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler(filename=definitions.LOGGING_DIRECTORY + "/model_train.py")
+
 
 def fine_tune_model(
         k_cross: int,

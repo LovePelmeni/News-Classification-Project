@@ -7,9 +7,7 @@ from constants import constants
 import definitions
 
 Logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler(filename=definitions.LOGGING_DIRECTORY + "/models.log")
-model = pickle.load(open(constants.MODEL_URL, mode='rb'))
-
+file_handler = logging.FileHandler(filename=definitions.ROOT_DIR + "/logs/models.log")
 
 class NewsPredictionModel(object):
     """
@@ -29,4 +27,5 @@ class NewsPredictionModel(object):
             Logger.error({'msg': err})
             raise PredictionFailed() 
 
+model = pickle.load(open(constants.MODEL_URL, mode='rb'))
 predictor = NewsPredictionModel(model=model)

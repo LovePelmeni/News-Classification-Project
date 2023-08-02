@@ -2,7 +2,7 @@ import logging
 import definitions
 
 logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler(filename=definitions.LOGGING_DIRECTORY + "/settings.log")
+file_handler = logging.FileHandler(filename=definitions.ROOT_DIR + "/logs/settings.log")
 logger.addHandler(file_handler)
 
 try:
@@ -10,26 +10,25 @@ try:
     import os
     from fastapi.middleware import cors
 
-    import controllers
-    from ..src import exceptions
-    import exc_handlers
+    from rest import controllers
+    from src import exceptions
+    from rest import exc_handlers
     
 except(ImportError, ModuleNotFoundError) as err:
-    logger.error({
-        'msg': err
-    })
+    logger.error({'msg': err})
     raise SystemExit(
         "Some of the modules failed to be loaded, check logs for more information"
     )
-
+    
 # Environment Variables
 
-DEBUG_MODE = os.environ.get("DEBUG_MODE")
-VERSION = os.environ.get("VERSION")
+DEBUG_MODE = os.environ.get("DEBUG_MODE", False)
+VERSION = os.environ.get("VERSION", "1.0.0")
 
 # CORS configuration
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS")
-ALLOWED_HEADERS = os.environ.get("ALLOWED_HEADERS")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*")
+ALLOWED_HEADERS = os.environ.get("ALLOWED_HEADERS", "*")
+
 
 try:
     application = fastapi.FastAPI(
