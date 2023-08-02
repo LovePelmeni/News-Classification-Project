@@ -1,4 +1,4 @@
-import logging 
+import logging
 import definitions
 
 logger = logging.getLogger(__name__)
@@ -29,13 +29,12 @@ VERSION = os.environ.get("VERSION", "1.0.0")
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*")
 ALLOWED_HEADERS = os.environ.get("ALLOWED_HEADERS", "*")
 
+application = fastapi.FastAPI(
+    debug=DEBUG_MODE,
+    version=VERSION
+)
 
 try:
-    application = fastapi.FastAPI(
-        debug=DEBUG_MODE,
-        version=VERSION
-    )
-
     # Adding Middlewares
     application.add_middleware(
         middleware_class=cors.CORSMiddleware,

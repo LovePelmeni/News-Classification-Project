@@ -1,6 +1,4 @@
 import logging 
-from src.models import predict_model
-from src.feature_form import feature_form
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 import definitions 
@@ -10,6 +8,9 @@ rest_logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler(
     filename=definitions.ROOT_DIR + "/logs/controllers.log"
 )
+
+from src.models import predict_model
+from src.feature_form import feature_form
 
 def predict_news_classification_tags(application_data: feature_form.BaseFeatureForm):
     """

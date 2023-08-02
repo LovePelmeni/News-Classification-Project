@@ -21,12 +21,12 @@ pytest = "^7.4.0"
 flake8 = "^6.1.0"
 autopep8 = "^2.0.2"
 jupyter = "^1.0.0"
+uvicorn = "^0.23.2"
 
-[pytest.options]
-addoptions = "-s"
-paths = [
-    "tests"
-]
+[tool.pytest.options]
+minversion = "7.4.0"
+addopts = "-s --junitxml=test_reports/report.xml"
+testpaths = ["tests"]
 
 [build-system]
 requires = ["poetry-core"]

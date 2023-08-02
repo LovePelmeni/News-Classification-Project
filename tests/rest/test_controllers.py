@@ -26,11 +26,9 @@ def test_prediction_controller(client):
     )
     assert response.status_code == 201
 
-
 def test_fail_prediction_controller(client):
     response = client.post(
         "/predict/news/tags/", 
         content=invalid_form
     )
     assert response.status_code == 400
-    
