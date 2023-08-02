@@ -84,6 +84,7 @@ def compare_categorical_features(old_f: pandas.Series, new_f: pandas.Series) -> 
     """
     Function compares categorical features
     and detects drift, once they have certain distinctions
+    using chi squared test 
 
     Args:
         old_f (pandas.Series) old feature distribution
@@ -92,7 +93,8 @@ def compare_categorical_features(old_f: pandas.Series, new_f: pandas.Series) -> 
     Returns:
         bool True whether no drift detected else False
     """
-    pass
+    (_, p_value) = stats.chisquare(f_obs=old_f, f_exp=new_f)
+    return p_value >= requirements.P_VALUE_THRESHOLD
 
 
 def compare_numerical_features(old_f: pandas.Series, new_f: pandas.Series) -> bool:
