@@ -1,7 +1,7 @@
 import logging 
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
-import definitions 
+import definitions
 
 rest_logger = logging.getLogger(__name__)
 
