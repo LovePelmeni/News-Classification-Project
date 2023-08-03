@@ -3,6 +3,7 @@ from scipy import stats
 import collections 
 import typing
 from model_requirements import requirements
+import numpy
 
 def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> typing.Dict[str, int]:
     """
@@ -116,7 +117,7 @@ def compare_numerical_features(old_f: pandas.Series, new_f: pandas.Series) -> bo
 def compare_boolean_features(old_f: pandas.Series, new_f: pandas.Series):
     """
     Function compares boolean features from old and new dataframes 
-    to detect drif
+    to detect drift using PHI coefficient
     
     Args:
         old_f (pandas.Series) old feature distribution
@@ -125,23 +126,26 @@ def compare_boolean_features(old_f: pandas.Series, new_f: pandas.Series):
     Returns:
         bool True whether no drift detected else False
     """
-    old_true_prop = old_f.eq(other=True).astype(int).sum() / old_f.shape[0]
-    old_false_prop = old_f.eq(other=False).astype(int).sum() / old_f.shape[0]
+    contingency_table = numpy.array(
+        [[numpy.sum((old_f == 1) & (new_f == 1)), numpy.sum((old_f == 1) & (new_f == 0))],
+        [numpy.sum((old_f == 0) & (new_f == 1)), numpy.sum((old_f == 0) & (new_f == 0))]]
+    )
+    
+    # Calculate the chi-squared test and ignore the p-value and degrees of freedom
+    chi2, _, _, _ = stats.chi2_contingency(contingency_table)
+    
+    # Calculate the phi coefficient
+    phi = numpy.sqrt(chi2 / numpy.sum(contingency_table))
+    
+    return phi
 
-    new_true_prop = new_f.eq(other=True).astype(int).sum() / new_f.shape[0]
-    new_false_prop = new_f.eq(other=False).astype(int).sum() / new_f.shape[0]
-
-    return abs(
-            old_true_prop - new_true_prop
-            ) <= requirements.STATS_THRESHOLD_LIMIT and abs(
-                old_false_prop - new_false_prop
-            ) <= requirements.STATS_THRESHOLD_LIMIT
 
 
 def compare_feature_relations(imp_feature: pandas.Series, target: pandas.Series) -> bool:
     """
     Function compares relations between important feature and target variable 
     to determine whether this feature is still valuable for predictions or not
+    using KL Divergence
 
     Args:
         imp_feature (pandas.Series) old feature distribution
@@ -150,4 +154,19 @@ def compare_feature_relations(imp_feature: pandas.Series, target: pandas.Series)
     Returns:
         bool True whether no drift detected else False
     """
-    pass 
+    if imp_feature.shape[0] != target.shape[0]:
+        raise ValueError("shapes of both distributions must be the same size")
+
+    if (~numpy.isclose(imp_feature, 1)) or (~numpy.isclose(target_distribution, 1)):
+        raise ValueError("both distributions should sum up to 1.")
+
+    epsilon = 1e-8
+    target_distribution = numpy.clip(target, epsilon, 1)
+    feature_distribution = numpy.clip(imp_feature, epsilon, 1)
+
+    kl_div = numpy.sum(
+        target_distribution * (
+        numpy.log(target_distribution / feature_distribution))
+    )
+    return kl_div
+    
