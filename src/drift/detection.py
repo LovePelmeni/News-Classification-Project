@@ -2,7 +2,7 @@ import pandas
 from scipy import stats
 import collections 
 import typing
-from model_requirements import requirements
+from baseline_requirements import data
 import numpy
 
 def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> typing.Dict[str, int]:
@@ -22,6 +22,10 @@ def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> 
                     old_f=old_data[feature],
                     new_f=new_data[feature]
                 )
+                driftmap[feature]['still_relevant'] = compare_cat_feature_relations(
+                    imp_feature=new_data[feature],
+                    target=new_data['category']
+                )
 
             elif feature in new_data.select_dtypes(include='number').columns:
 
@@ -32,6 +36,10 @@ def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> 
                 driftmap[feature]['variance'] = check_variance_distinction(
                     old_f=old_data[feature],
                     new_f=new_data[feature]
+                )
+                driftmap[feature]['still_relevant'] = compare_num_feature_relations(
+                    imp_feature=new_data[feature],
+                    target=new_data['category']
                 )
                 
             elif feature in new_data.select_dtypes(include='boolean').columns:
@@ -63,7 +71,7 @@ def check_null_proportion(feature: pandas.Series) -> bool:
     """
     if len(feature) == 0: return False 
     prop = feature.isna().sum() / len(feature) 
-    return prop >= requirements.STATS_THRESHOLD_LIMIT
+    return prop >= data.STATS_THRESHOLD_LIMIT
 
     
 def check_variance_distinction(old_f: pandas.Series, new_f: pandas.Series) -> bool:
@@ -80,7 +88,7 @@ def check_variance_distinction(old_f: pandas.Series, new_f: pandas.Series) -> bo
         False - variance is not okay (drift)
     """
     stats, p_value = stats.levene(old_f, new_f)
-    return p_value >= requirements.P_VALUE_THRESHOLD
+    return p_value >= data.P_VALUE_THRESHOLD
 
 def compare_categorical_features(old_f: pandas.Series, new_f: pandas.Series) -> bool:
     """
@@ -96,7 +104,7 @@ def compare_categorical_features(old_f: pandas.Series, new_f: pandas.Series) -> 
         bool True whether no drift detected else False
     """
     (_, p_value) = stats.chisquare(f_obs=old_f, f_exp=new_f)
-    return p_value >= requirements.P_VALUE_THRESHOLD
+    return p_value >= data.P_VALUE_THRESHOLD
 
 
 def compare_numerical_features(old_f: pandas.Series, new_f: pandas.Series) -> bool:
@@ -112,7 +120,7 @@ def compare_numerical_features(old_f: pandas.Series, new_f: pandas.Series) -> bo
         bool True whether no drift detected else False
     """
     _, p_value = stats.ks_2samp(old_f, new_f)
-    return p_value >= requirements.P_VALUE_THRESHOLD 
+    return p_value >= data.P_VALUE_THRESHOLD 
 
 def compare_boolean_features(old_f: pandas.Series, new_f: pandas.Series):
     """
@@ -139,9 +147,30 @@ def compare_boolean_features(old_f: pandas.Series, new_f: pandas.Series):
     
     return phi
 
+def compare_cat_feature_relations(imp_feature: pandas.Series, target: pandas.Series) -> bool:
+    """
+    Function compares relation between categorical feature and target variable 
+    using 
+    """
+    if imp_feature.shape[0] != target.shape[0]:
+        raise ValueError("Feature and target should have the same length")
 
+def compare_boolean_feature_relations(imp_feature: pandas.Series, target: pandas.Series) -> bool:
+    """
+    Function compares correlation between feature and target variable
+    model container reote
+    """
+    if imp_feature.shape[0] != target.shape[0]:
+        raise ValueError("Feature and")
 
-def compare_feature_relations(imp_feature: pandas.Series, target: pandas.Series) -> bool:
+    boolean_feature = numpy.asarray(imp_feature, dtype=numpy.int_)
+    target_feature = numpy.asarray(target)
+
+    table = [boolean_feature, target_feature]
+    _, p_value, _ = stats.chi2_contingency(observed=table)
+    return p_value <= data.STATS_THRESHOLD_LIMIT
+
+def compare_num_feature_relations(imp_feature: pandas.Series, target: pandas.Series) -> bool:
     """
     Function compares relations between important feature and target variable 
     to determine whether this feature is still valuable for predictions or not
@@ -169,4 +198,3 @@ def compare_feature_relations(imp_feature: pandas.Series, target: pandas.Series)
         numpy.log(target_distribution / feature_distribution))
     )
     return kl_div
-    
