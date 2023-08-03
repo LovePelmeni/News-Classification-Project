@@ -1,6 +1,5 @@
 from ....src.encoders import encoders 
-import pandas 
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder, TargetEncoder
+import pandas
 
 class DatasetEncoder(encoders.BaseDatasetEncoder):
     
