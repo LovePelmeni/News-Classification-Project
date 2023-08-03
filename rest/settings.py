@@ -13,6 +13,7 @@ try:
     from rest import controllers
     from src import exceptions
     from rest import exc_handlers
+    from rest import system_metrics
     
 except(ImportError, ModuleNotFoundError) as err:
     logger.error({'msg': err})
@@ -56,6 +57,13 @@ try:
         methods=["GET"],
         endpoint=controllers.healthcheck,
         description="Startard Healthcheck API Endpoint"
+    )
+    
+    # resource metrics usage endpoints 
+    application.add_api_route(
+        path="/container/",
+        methods=["GET"],
+        endpoint=system_metrics.get_machine_resource_usage,
     )
 
     # Adding Exception Handlers 

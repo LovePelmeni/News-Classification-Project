@@ -33,8 +33,9 @@ def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> 
                     new_f=new_data[feature]
                 )
                 
-            else:
-                driftmap[feature]['p_value'] = compare_boolean_features(
+            elif feature in new_data.select_dtypes(include='boolean').columns:
+            
+                driftmap[feature]['class_prop_distincts'] = compare_boolean_features(
                     old_f=old_data[feature],
                     new_f=new_data[feature]
                 )
@@ -61,7 +62,7 @@ def check_null_proportion(feature: pandas.Series) -> bool:
     """
     if len(feature) == 0: return False 
     prop = feature.isna().sum() / len(feature) 
-    return prop <= requirements.STATS_THRESHOLD_LIMIT
+    return prop >= requirements.STATS_THRESHOLD_LIMIT
 
     
 def check_variance_distinction(old_f: pandas.Series, new_f: pandas.Series) -> bool:
@@ -124,6 +125,17 @@ def compare_boolean_features(old_f: pandas.Series, new_f: pandas.Series):
     Returns:
         bool True whether no drift detected else False
     """
+    old_true_prop = old_f.eq(other=True).astype(int).sum() / old_f.shape[0]
+    old_false_prop = old_f.eq(other=False).astype(int).sum() / old_f.shape[0]
+
+    new_true_prop = new_f.eq(other=True).astype(int).sum() / new_f.shape[0]
+    new_false_prop = new_f.eq(other=False).astype(int).sum() / new_f.shape[0]
+
+    return abs(
+            old_true_prop - new_true_prop
+            ) <= requirements.STATS_THRESHOLD_LIMIT and abs(
+                old_false_prop - new_false_prop
+            ) <= requirements.STATS_THRESHOLD_LIMIT
 
 
 def compare_feature_relations(imp_feature: pandas.Series, target: pandas.Series) -> bool:
