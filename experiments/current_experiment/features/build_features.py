@@ -1,13 +1,26 @@
 import numpy
 import pandas
-from sklearn.feature_extraction.text import TfidfVectorizer
-import typing
 import logging
 
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler(filename="features.log")
 logger.addHandler(file_handler)
 
+def build_features(dataset: pandas.DataFrame):
+    """
+    Function builds feature for the given dataset 
+    
+    Args:
+        dataset (pandas.DataFrame) - experimental dataset
+    """
+    if dataset.shape[0] == 0: return dataset 
+    try:
+        dataset['headline_length'] = __construct_headline_length(dataset)
+        dataset['description_length'] = __construct_description_length(dataset)
+        dataset = __construct_average_headline_and_description_lengths(dataset)
+        dataset = __construct_popular_weekday(dataset)
+    except(ValueError, TypeError, AttributeError) as err:
+        logger.debug(err)
 
 def __construct_headline_length(news_applications: pandas.DataFrame):
     news_applications['headline_len'] = news_applications['headline'].str.split(" ").apply(
@@ -19,7 +32,7 @@ def __construct_description_length(news_applications: pandas.DataFrame):
         lambda description: numpy.array(description).shape[0]
     )
 
-def construct_average_headline_and_description_lengths(news_applications: pandas.DataFrame):
+def __construct_average_headline_and_description_lengths(news_applications: pandas.DataFrame):
     """
     Method constructs average headline and description lengths 
     for each news article category
@@ -38,7 +51,7 @@ def construct_average_headline_and_description_lengths(news_applications: pandas
         averages, on='category'
     )
 
-def construct_popular_weekday(news_applications):
+def __construct_popular_weekday(news_applications):
     """
     Finds most popular day to publish article
     based on category
@@ -52,43 +65,3 @@ def construct_popular_weekday(news_applications):
     ).reset_index()
 
     return news_applications.merge(most_freq_weekdays, on='category')
-
-
-def get_most_frequent_headline_words(categories: typing.List, dataset: pandas.DataFrame):
-    """
-    Function returns hashmap, containing headline most frequent words per category
-    limit set up to 5
-    Args:
-        categories: typing.List - array, containing unique categories
-    """
-    if len(categories) == 0: return
-
-    headlines = {}
-    for category in categories:
-        vec = TfidfVectorizer(stop_words='english', ngram_range=(1, 3))
-        data = dataset.loc[dataset['category'] == category, 'headline']
-        matrix = vec.fit_transform(data)
-        word_frequencies = matrix.sum(axis=0).A1
-        feature_names = vec.get_feature_names_out()
-        headlines[category] = sorted(dict(zip(feature_names, word_frequencies)), key=lambda item: item[1])[:5]
-    return headlines
-
-
-def get_most_frequent_headline_words(categories: typing.List, dataset: pandas.DataFrame):
-    """
-    Function returns hashmap, containing most description frequent words per category
-    limit set up to 5
-    Args:
-        categories: typing.List - array, containing unique categories
-    """
-    if len(categories) == 0: return
-
-    headlines = {}
-    for category in categories:
-        vec = TfidfVectorizer(stop_words='english', ngram_range=(1, 3))
-        data = dataset.loc[dataset['category'] == category, 'short_description']
-        matrix = vec.fit_transform(data)
-        word_frequencies = matrix.sum(axis=0).A1
-        feature_names = vec.get_feature_names_out()
-        headlines[category] = sorted(dict(zip(feature_names, word_frequencies)), key=lambda item: item[1])[:5]
-    return headlines
