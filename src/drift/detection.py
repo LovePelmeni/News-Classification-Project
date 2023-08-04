@@ -44,18 +44,19 @@ def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> 
                 
             elif feature in new_data.select_dtypes(include='boolean').columns:
             
-                driftmap[feature]['class_prop_distincts'] = compare_boolean_features(
+                driftmap[feature]['phi_value'] = compare_boolean_features(
                     old_f=old_data[feature],
                     new_f=new_data[feature]
                 )
-            
+   
             driftmap[feature]['null_exceed'] = check_null_proportion(
                 feature=new_data[feature]
             )
+
         return driftmap
     except Exception as err:
         raise err
-
+    
 
 def check_null_proportion(feature: pandas.Series) -> bool:
     """

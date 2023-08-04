@@ -41,7 +41,7 @@ try:
         middleware_class=cors.CORSMiddleware,
         allowed_hosts=[host for host in ALLOWED_HOSTS] if ALLOWED_HOSTS else ["*"],
         allowed_headers=[header for header in ALLOWED_HEADERS] if ALLOWED_HEADERS else ["*"],
-        allowed_methods=["POST", "OPTIONS"]
+        allowed_methods=["POST", "OPTIONS", "GET"]
     )
 
     # Adding Rest Endpoints
@@ -63,7 +63,7 @@ try:
     application.add_api_route(
         path="/container/",
         methods=["GET"],
-        endpoint=system_metrics.get_machine_resource_usage,
+        endpoint=system_metrics.get_system_resource_metrics,
     )
 
     # Adding Exception Handlers 
