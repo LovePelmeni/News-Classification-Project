@@ -1,15 +1,19 @@
-FROM --platform=arm64 python3.9-bullseye 
+FROM python:3.10-bullseye
 LABEL author=kirklimushin@gmail.com 
 RUN echo "Building project... Relax and get some 🍺"
 
 # Root user credentials 
-ARG ROOT_USER 
+ARG ROOT_USER=python_user
 
 # Creating custom user
-RUN useradd --create-home ${ROOT_USER}
+RUN useradd -ms /bin/bash ${ROOT_USER}
+RUN usermod -aG sudo ${ROOT_USER}
 
 # Initializing working directory 
 WORKDIR /project/dir/${ROOT_USER}
+
+
+# copying project source 
 
 COPY ./deployment ./deployment
 COPY ./src ./src
@@ -17,16 +21,28 @@ COPY ./proj_requirements/prod_requirements.txt ./
 COPY ./poetry.lock ./
 COPY ./pyproject.toml ./
 COPY ./definitions.py ./
+COPY ./rest ./rest
+COPY ./tests ./tests
+COPY ./experiments ./experiments
+COPY ./constants ./constants
+COPY __init__.py ./__init__.py
+COPY deployment/entrypoint.sh ./
 
-RUN pip install --upgrade pip 
+# updating pip installer and installing gcc lib for more reliable project 
+# compilation
+RUN pip install --upgrade pip && apt-get install gcc
 
-RUN poetry install && poetry export --format=requirements.txt \\
+# installing poetry package manager
+RUN pip install poetry
+
+RUN poetry install --no-dev && poetry export --format=requirements.txt \
 --output=prod_requirements.txt --without-hashes
 
 RUN pip install -r prod_requirements.txt && pip install 'fastapi[all]' --upgrade
 
 RUN chmod +x definitions.py
 RUN chmod +x entrypoint.sh
+RUN chmod +x definitions.py
 
 RUN python definitions.py
 ENTRYPOINT ["sh", "entrypoint.sh"]

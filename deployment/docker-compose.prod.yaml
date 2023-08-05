@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+
+  nginx_server:
+    container_name: nginx-server 
+    image: nginx:latest 
+    ports:
+      - "8000:80"
+    networks:
+      - news_classification_network 
+    volumes:
+      - ../nginx/nginx.conf:etc/nginx/nginx.conf 
+    depends_on:
+      - application
+
+  application:
+    container_name: ml_application 
+    image: crazycoderrr/news_classification_project:latest 
+    env_file: 
+      - ../env/proj.env
+      - ../env/database.env
+    networks:
+       - news_classification_network 
+    ports:
+      - "8080:8080"
+    healthcheck:
+      - test: ["CURL", '-f', "http://localhost:8080/healthcheck/"]
+        retries: 5 
+        timeout: 5s 
+    depends_on:
+      - database 
+
+  database:
+    container_name: "postgres_database"  
+    image: postgres:latest 
+    env_file:
+      - ../env/database.env 
+    networks:
+      - news_classification_network
+    ports:
+      - "5432:5432"
+    
