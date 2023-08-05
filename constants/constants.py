@@ -1,2 +1,1 @@
 MODEL_URL="experiments/current_experiment/models/classifier.pkl"
-LAST_EXPERIMENT_NUMBER=1
