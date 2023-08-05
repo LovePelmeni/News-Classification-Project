@@ -66,6 +66,12 @@ try:
         endpoint=system_metrics.get_system_resource_metrics,
     )
 
+    application.add_api_route(
+        path="/get/system/resource/consume/",
+        methods=['GET'],
+        endpoint=controllers.check_resource_exceed
+    )
+
     # Adding Exception Handlers 
     application.add_exception_handler(
         exc_class_or_status_code=exceptions.PredictionFailed,

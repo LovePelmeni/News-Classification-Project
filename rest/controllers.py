@@ -1,7 +1,10 @@
 import logging 
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
-import definitions
+
+import definitions 
+from rest import system_metrics
+from system_metrics import check_resource_exceed
 
 rest_logger = logging.getLogger(__name__)
 
@@ -31,3 +34,23 @@ def healthcheck(request: Request):
     Standard Heatlhcheck REST-Endpoint
     """
     return JSONResponse(status_code=200)
+
+def check_resource_usage(request: Request):
+    """
+    Rest Endpoint for Monitoring application's resource usage, including: 
+        1. CPU Usage 
+        2. Memory Usage 
+        3. Disk Space Usage
+    """
+    output = {}
+    resource_info = system_metrics.get_system_resource_metrics()
+    for resource_group in resource_info.keys():
+        output[resource_group] = {
+            "exceeds": check_resource_exceed(
+                metric_type=resource_group,
+                metrics=resource_info[resource_group]
+            ),
+            "metric_type": resource_group,
+            "usage (%)": resource_info[resource_group]['Usage']
+        }
+    return resource_group

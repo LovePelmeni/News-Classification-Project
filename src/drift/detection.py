@@ -4,6 +4,12 @@ import collections
 import typing
 from baseline_requirements import data
 import numpy
+import logging 
+import definitions
+import os
+
+logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler(filename=os.path.join(definitions.ROOT_DIR, "logs/drift_detection.py"))
 
 def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> typing.Dict[str, int]:
     """
@@ -20,11 +26,13 @@ def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> 
 
                 driftmap[feature]['p_value'] = compare_categorical_features(
                     old_f=old_data[feature],
-                    new_f=new_data[feature]
+                    new_f=new_data[feature],
+                    dataset=new_data,
                 )
+                
                 driftmap[feature]['still_relevant'] = compare_cat_feature_relations(
                     imp_feature=new_data[feature],
-                    target=new_data['category']
+                    target=new_data['category'],
                 )
 
             elif feature in new_data.select_dtypes(include='number').columns:
@@ -91,7 +99,7 @@ def check_variance_distinction(old_f: pandas.Series, new_f: pandas.Series) -> bo
     stats, p_value = stats.levene(old_f, new_f)
     return p_value >= data.P_VALUE_THRESHOLD
 
-def compare_categorical_features(old_f: pandas.Series, new_f: pandas.Series) -> bool:
+def compare_categorical_features(old_f: pandas.Series, new_f: pandas.Series, dataset: pandas.DataFrame) -> bool:
     """
     Function compares categorical features
     and detects drift, once they have certain distinctions
@@ -104,9 +112,21 @@ def compare_categorical_features(old_f: pandas.Series, new_f: pandas.Series) -> 
     Returns:
         bool True whether no drift detected else False
     """
-    (_, p_value) = stats.chisquare(f_obs=old_f, f_exp=new_f)
-    return p_value >= data.P_VALUE_THRESHOLD
+    if old_f.shape[0] != new_f.shape[0]: 
+        raise ValueError("features should have the same length")
+    try:
+        old_contingency_table = dataset[old_f].pivot_table(columns='category', values='date', aggfunc='count').iloc[0]
+        new_contigency_table = dataset[new_f].pivot_table(columns='category', values='date', aggfunc='count').iloc[0]
 
+        _, p_val_old, _, _ = stats.chi2_contingency(observed=old_contingency_table)
+        _, p_val_new, _, _ = stats.chi2_contingency(observed=new_contigency_table)
+
+        return ((p_val_old >= data.P_VALUE_THRESHOLD) and (p_val_new >= data.P_VALUE_THRESHOLD)
+        ) or ((p_val_old <= data.P_VALUE_THRESHOLD) and (p_val_new <= data.P_VALUE_THRESHOLD))
+
+    except Exception as err:
+        logger.error(err)
+        return False
 
 def compare_numerical_features(old_f: pandas.Series, new_f: pandas.Series) -> bool:
     """
