@@ -23,6 +23,14 @@ def fine_tune_model(
         """
         Function fine-tune ML Model using Cross-Validation with provided 
         hyperparameters and loss function
+        
+        Args:
+            k_cross: K for cross-validation 
+            training_set: (pandas.DataFrame) - training set
+            target_variable: (str) - target variable we are trying to predict
+            hyperparams: typing.Dict - dictionary, containing hyperparamaters for fine tuning 
+            model: ML Model to tune 
+            loss_function_or_scorer_metric - scoring function used for optimization
         """
         try:
             x_train = training_set.drop(columns=[target_variable])
@@ -48,4 +56,3 @@ def fine_tune_model(
 
         raise RuntimeError("""Failed to fine tune model, 
         check logs for more information""")
-            

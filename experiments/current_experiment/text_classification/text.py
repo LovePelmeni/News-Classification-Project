@@ -1,19 +1,19 @@
 import torch
+import torch.nn as nn
 from torch.utils.data import Dataset 
 from transformers import AutoConfig, AutoTokenizer, AutoModel
 import typing 
 import logging 
-import definitions 
 import os
 import pandas 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler(
-    filename=os.path.join(definitions.ROOT_DIR, "/logs/nn_training.log")
+    filename=os.path.join("../experiment_logs/text_classification.log")
 )
 logger.addHandler(file_handler)
-logger.setLevel(leve=logging.CRITICAL)
+logger.setLevel(level=logging.CRITICAL)
 
 class EncodeError(BaseException):
     def __init__(self, msg):
@@ -77,7 +77,7 @@ class TextClassificationDataset(Dataset):
         return output_dict
 
 
-class BertTextClassifier(torch.Module):
+class BertTextClassifier(nn.Module):
     
     def __init__(self,
         model_name: str = "distilbert-base-uncased",
@@ -120,14 +120,12 @@ class TFIDFVectorizedDataset(dict):
 
     def __init__(self, text_data: pandas.DataFrame):
         self.text_data = text_data 
-        self.vectorizer = TfidfVectorizer()
+        self.vectorizer = TfidfVectorizer(stop_words='english')
 
-    def __getitem__(self, field: str):
-        if field not in self.text_data.columns:
-            raise KeyError("Feature does not exist")
+    def get_vectorized_df(self):
         try:
             encoded = self.vectorizer.fit_transform(
-                raw_documents=self.text_data[field],
+                raw_documents=self.text_data,
                 lowercase=True
             )
             return encoded.toarray() 

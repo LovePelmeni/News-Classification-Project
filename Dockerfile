@@ -5,6 +5,10 @@ RUN echo "Building project... Relax and get some 🍺"
 # Root user credentials 
 ARG ROOT_USER=python_user
 
+# Environment Project Variables
+ENV POETRY_VIRTUALENVS_CREATE=false
+ENV PYTHONUNBUFFERED=0
+
 # Creating custom user
 RUN useradd -ms /bin/bash ${ROOT_USER}
 RUN usermod -aG sudo ${ROOT_USER}
@@ -27,6 +31,7 @@ COPY ./experiments ./experiments
 COPY ./constants ./constants
 COPY __init__.py ./__init__.py
 COPY deployment/entrypoint.sh ./
+COPY ./tox.ini ./
 
 # updating pip installer and installing gcc lib for more reliable project 
 # compilation

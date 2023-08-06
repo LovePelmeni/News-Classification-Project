@@ -27,5 +27,8 @@ class NewsPredictionModel(object):
             Logger.error({'msg': err})
             raise PredictionFailed() 
 
-model = pickle.load(open(constants.MODEL_URL, mode='rb'))
-predictor = NewsPredictionModel(model=model)
+baseline_model = pickle.load(open(constants.MODEL_URL, mode='rb'))
+nn_model = ""
+
+baseline_predictor = NewsPredictionModel(model=baseline_model)
+nn_predictor = NewsPredictionModel(model=nn_model)

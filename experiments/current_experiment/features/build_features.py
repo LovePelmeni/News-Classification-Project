@@ -3,7 +3,7 @@ import pandas
 import logging
 
 logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler(filename="features.log")
+file_handler = logging.FileHandler(filename="../experiment_logs/features.log")
 logger.addHandler(file_handler)
 
 def build_features(dataset: pandas.DataFrame):
@@ -19,8 +19,10 @@ def build_features(dataset: pandas.DataFrame):
         dataset['description_length'] = __construct_description_length(dataset)
         dataset = __construct_average_headline_and_description_lengths(dataset)
         dataset = __construct_popular_weekday(dataset)
+        return dataset
     except(ValueError, TypeError, AttributeError) as err:
         logger.debug(err)
+        return dataset
 
 def __construct_headline_length(news_applications: pandas.DataFrame):
     news_applications['headline_len'] = news_applications['headline'].str.split(" ").apply(
