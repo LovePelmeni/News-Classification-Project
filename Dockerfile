@@ -16,7 +16,6 @@ RUN usermod -aG sudo ${ROOT_USER}
 # Initializing working directory 
 WORKDIR /project/dir/${ROOT_USER}
 
-
 # copying project source 
 
 COPY ./deployment ./deployment

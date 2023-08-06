@@ -30,7 +30,7 @@ services:
     depends_on:
       - database 
 
-  database:
+  postgresql:
     container_name: "postgres_database"  
     image: postgres:latest 
     env_file:
@@ -39,4 +39,8 @@ services:
       - news_classification_network
     ports:
       - "5432:5432"
+
+  pg_admin:
+    container_name: pg_admin 
+    image: 
     
