@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap 
+namespace:
+  - "ml_namespace"
+data:
+  | some-data
+
+--- 
+
+apiVersion: v1 
+kind: Secret 
+namespace:
+  - "ml_namespace"
