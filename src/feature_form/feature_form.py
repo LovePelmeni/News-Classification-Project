@@ -1,6 +1,6 @@
 import abc
-import pydantic 
-import pandas 
+import pydantic
+import pandas
 
 
 class BaseFeatureForm(pydantic.BaseModel, abc.ABC):

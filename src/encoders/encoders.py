@@ -1,5 +1,6 @@
 import abc
-import pandas 
+import pandas
+
 
 class BaseDatasetEncoder(abc.ABC):
 

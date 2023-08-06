@@ -1,20 +1,34 @@
-import pandas 
+import pandas
 from scipy import stats
-import collections 
+import collections
 import typing
 from baseline_requirements import data
 import numpy
-import logging 
+import logging
 import definitions
 import os
 
 logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler(filename=os.path.join(definitions.ROOT_DIR, "logs/drift_detection.py"))
+file_handler = logging.FileHandler(filename=os.path.join(
+    definitions.ROOT_DIR, "logs/drift_detection.py"))
+
 
 def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> typing.Dict[str, int]:
     """
     Function compares 2 datasets and checks for potential drift 
     using statistical tests 
+
+    Args:
+        old_data: (pandas.DataFrame) object, containing old data 
+        new_data: (pandas.DataFrame) object, containing new data
+
+    Returns:
+        Dictionary, containing drift information about each individual 
+        feature, presented in the dataset, including properties:    
+        
+            1. null proportion
+            2. variance / mode (for checking distribution drift)
+            3. p_value / phi_value (for feature relevance)
     """
     if old_data.columns.to_list().sort() != new_data.columns.to_list().sort():
         raise ValueError("Datasets are not compatible")
@@ -29,7 +43,7 @@ def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> 
                     new_f=new_data[feature],
                     dataset=new_data,
                 )
-                
+
                 driftmap[feature]['still_relevant'] = compare_cat_feature_relations(
                     imp_feature=new_data[feature],
                     target=new_data['category'],
@@ -49,14 +63,14 @@ def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> 
                     imp_feature=new_data[feature],
                     target=new_data['category']
                 )
-                
+
             elif feature in new_data.select_dtypes(include='boolean').columns:
-            
+
                 driftmap[feature]['phi_value'] = compare_boolean_features(
                     old_f=old_data[feature],
                     new_f=new_data[feature]
                 )
-   
+
             driftmap[feature]['null_exceed'] = check_null_proportion(
                 feature=new_data[feature]
             )
@@ -64,7 +78,7 @@ def compare_datasets(old_data: pandas.DataFrame, new_data: pandas.DataFrame) -> 
         return driftmap
     except Exception as err:
         raise err
-    
+
 
 def check_null_proportion(feature: pandas.Series) -> bool:
     """
@@ -78,16 +92,17 @@ def check_null_proportion(feature: pandas.Series) -> bool:
         True - exceeds limit
         False - okay
     """
-    if len(feature) == 0: return False 
-    prop = feature.isna().sum() / len(feature) 
+    if len(feature) == 0:
+        return False
+    prop = feature.isna().sum() / len(feature)
     return prop >= data.STATS_THRESHOLD_LIMIT
 
-    
+
 def check_variance_distinction(old_f: pandas.Series, new_f: pandas.Series) -> bool:
     """
     Function checks the variance between old and new feature
     using Levene statistical test
-    
+
     Args:
         old_f: pandas.Series
         new_f: pandas.Series object containg
@@ -98,6 +113,7 @@ def check_variance_distinction(old_f: pandas.Series, new_f: pandas.Series) -> bo
     """
     stats, p_value = stats.levene(old_f, new_f)
     return p_value >= data.P_VALUE_THRESHOLD
+
 
 def compare_categorical_features(old_f: pandas.Series, new_f: pandas.Series, dataset: pandas.DataFrame) -> bool:
     """
@@ -112,27 +128,32 @@ def compare_categorical_features(old_f: pandas.Series, new_f: pandas.Series, dat
     Returns:
         bool True whether no drift detected else False
     """
-    if old_f.shape[0] != new_f.shape[0]: 
+    if old_f.shape[0] != new_f.shape[0]:
         raise ValueError("features should have the same length")
     try:
-        old_contingency_table = dataset[old_f].pivot_table(columns='category', values='date', aggfunc='count').iloc[0]
-        new_contigency_table = dataset[new_f].pivot_table(columns='category', values='date', aggfunc='count').iloc[0]
+        old_contingency_table = dataset[old_f].pivot_table(
+            columns='category', values='date', aggfunc='count').iloc[0]
+        new_contigency_table = dataset[new_f].pivot_table(
+            columns='category', values='date', aggfunc='count').iloc[0]
 
-        _, p_val_old, _, _ = stats.chi2_contingency(observed=old_contingency_table)
-        _, p_val_new, _, _ = stats.chi2_contingency(observed=new_contigency_table)
+        _, p_val_old, _, _ = stats.chi2_contingency(
+            observed=old_contingency_table)
+        _, p_val_new, _, _ = stats.chi2_contingency(
+            observed=new_contigency_table)
 
         return ((p_val_old >= data.P_VALUE_THRESHOLD) and (p_val_new >= data.P_VALUE_THRESHOLD)
-        ) or ((p_val_old <= data.P_VALUE_THRESHOLD) and (p_val_new <= data.P_VALUE_THRESHOLD))
+                ) or ((p_val_old <= data.P_VALUE_THRESHOLD) and (p_val_new <= data.P_VALUE_THRESHOLD))
 
     except Exception as err:
         logger.error(err)
         return False
 
+
 def compare_numerical_features(old_f: pandas.Series, new_f: pandas.Series) -> bool:
     """
     Function compares numerical features from old and new dataframes
     to detect drift using Kolmogorov-Smirnov Test
-    
+
     Args:
         old_f (pandas.Series) old feature distribution
         new_f (pandas.Series) new feature distribution
@@ -141,13 +162,14 @@ def compare_numerical_features(old_f: pandas.Series, new_f: pandas.Series) -> bo
         bool True whether no drift detected else False
     """
     _, p_value = stats.ks_2samp(old_f, new_f)
-    return p_value >= data.P_VALUE_THRESHOLD 
+    return p_value >= data.P_VALUE_THRESHOLD
+
 
 def compare_boolean_features(old_f: pandas.Series, new_f: pandas.Series):
     """
     Function compares boolean features from old and new dataframes 
     to detect drift using PHI coefficient
-    
+
     Args:
         old_f (pandas.Series) old feature distribution
         new_f (pandas.Series) new feature distribution
@@ -157,16 +179,17 @@ def compare_boolean_features(old_f: pandas.Series, new_f: pandas.Series):
     """
     contingency_table = numpy.array(
         [[numpy.sum((old_f == 1) & (new_f == 1)), numpy.sum((old_f == 1) & (new_f == 0))],
-        [numpy.sum((old_f == 0) & (new_f == 1)), numpy.sum((old_f == 0) & (new_f == 0))]]
+         [numpy.sum((old_f == 0) & (new_f == 1)), numpy.sum((old_f == 0) & (new_f == 0))]]
     )
-    
+
     # Calculate the chi-squared test and ignore the p-value and degrees of freedom
     chi2, _, _, _ = stats.chi2_contingency(contingency_table)
-    
+
     # Calculate the phi coefficient
     phi = numpy.sqrt(chi2 / numpy.sum(contingency_table))
-    
+
     return phi
+
 
 def compare_cat_feature_relations(imp_feature: pandas.Series, target: pandas.Series) -> bool:
     """
@@ -175,6 +198,7 @@ def compare_cat_feature_relations(imp_feature: pandas.Series, target: pandas.Ser
     """
     if imp_feature.shape[0] != target.shape[0]:
         raise ValueError("Feature and target should have the same length")
+
 
 def compare_boolean_feature_relations(imp_feature: pandas.Series, target: pandas.Series) -> bool:
     """
@@ -190,6 +214,7 @@ def compare_boolean_feature_relations(imp_feature: pandas.Series, target: pandas
     table = [boolean_feature, target_feature]
     _, p_value, _ = stats.chi2_contingency(observed=table)
     return p_value <= data.STATS_THRESHOLD_LIMIT
+
 
 def compare_num_feature_relations(imp_feature: pandas.Series, target: pandas.Series) -> bool:
     """
@@ -216,6 +241,6 @@ def compare_num_feature_relations(imp_feature: pandas.Series, target: pandas.Ser
 
     kl_div = numpy.sum(
         target_distribution * (
-        numpy.log(target_distribution / feature_distribution))
+            numpy.log(target_distribution / feature_distribution))
     )
     return kl_div

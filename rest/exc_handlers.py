@@ -1,5 +1,6 @@
 from fastapi import Request
-from fastapi import responses 
+from fastapi import responses
+
 
 def handle_invalid_form(request: Request, exc):
     """
@@ -12,7 +13,7 @@ def handle_invalid_form(request: Request, exc):
         JSONResponse, containing explanations for the given error
     """
     return responses.JSONResponse(
-        status_code=400, 
+        status_code=400,
         content={
             'error': exc
         }

@@ -1,10 +1,11 @@
 import psutil
-import typing 
+import typing
 from baseline_requirements import system
 
+
 def check_resource_exceed(
-    metric_type: typing.Literal['disk_info', 'memory_info', 'cpu_info'], 
-    metrics: typing.Dicts[str, int]) -> bool:
+        metric_type: typing.Literal['disk_info', 'memory_info', 'cpu_info'],
+        metrics: typing.Dicts[str, int]) -> bool:
     """
     Function checks for resource exceed for provided metric type
     Args:
@@ -16,10 +17,11 @@ def check_resource_exceed(
 
     elif metric_type == "memory_info":
         return metrics['Memory Usage (GB)'] <= system.RAM_USAGE
-    
+
     elif metric_type == "cpu_info":
         return metrics['CPU Usage (GB)'] <= system.CPU_USAGE
-    
+
+
 def get_system_resource_metrics():
     """
     Function returns information about internal hardware
@@ -45,7 +47,8 @@ def get_system_resource_metrics():
     # Get disk information
     disk = psutil.disk_usage('/')
     disk_info = {
-        'Total Disk Space (GB)': disk.total >> 30,  # Convert bytes to gigabytes
+        # Convert bytes to gigabytes
+        'Total Disk Space (GB)': disk.total >> 30,
         'Used Disk Space (GB)': disk.used >> 30,
         'Free Disk Space (GB)': disk.free >> 30,
         'Usage': disk.percent,
