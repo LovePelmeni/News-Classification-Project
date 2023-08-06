@@ -13,7 +13,6 @@ file_handler = logging.FileHandler(
     filename=os.path.join("../experiment_logs/text_classification.log")
 )
 logger.addHandler(file_handler)
-logger.setLevel(level=logging.CRITICAL)
 
 class EncodeError(BaseException):
     def __init__(self, msg):

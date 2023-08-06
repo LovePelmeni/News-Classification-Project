@@ -1,6 +1,6 @@
-import numpy
 import pandas
 import logging
+import numpy
 
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler(filename="../experiment_logs/features.log")
@@ -15,8 +15,8 @@ def build_features(dataset: pandas.DataFrame):
     """
     if dataset.shape[0] == 0: return dataset 
     try:
-        dataset['headline_length'] = __construct_headline_length(dataset)
-        dataset['description_length'] = __construct_description_length(dataset)
+        __construct_headline_length(dataset)
+        __construct_description_length(dataset)
         dataset = __construct_average_headline_and_description_lengths(dataset)
         dataset = __construct_popular_weekday(dataset)
         return dataset
@@ -26,13 +26,11 @@ def build_features(dataset: pandas.DataFrame):
 
 def __construct_headline_length(news_applications: pandas.DataFrame):
     news_applications['headline_len'] = news_applications['headline'].str.split(" ").apply(
-        lambda headline: numpy.array(headline).shape[0]
-    )
+    lambda item: numpy.array(item).shape[0])
 
 def __construct_description_length(news_applications: pandas.DataFrame):
     news_applications['description_len'] = news_applications['short_description'].str.split(" ").apply(
-        lambda description: numpy.array(description).shape[0]
-    )
+    lambda item: numpy.array(item).shape[0])
 
 def __construct_average_headline_and_description_lengths(news_applications: pandas.DataFrame):
     """
