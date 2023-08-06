@@ -3,8 +3,6 @@ name = "news-classification-project"
 version = "0.1.0"
 description = "News Classification ML Project"
 authors = ["Kirill Klimushin"]
-readme = "README.md"
-packages = [{include = "news_classification_project"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
