@@ -6,24 +6,35 @@ warnings.filterwarnings('ignore')
 
 class TFIDFVectorizedDataset(dict):
 
-    def __init__(self, text_data: pandas.DataFrame):
-        self.text_data = text_data 
-        self.vectorizer = text.TfidfVectorizer(
-            stop_words='english', 
-            max_features=200,
-            min_df=0.05,
-            lowercase=True
-        )
+    """
+    Class used for vectorizing key words for provided category 
+    using TF/IDF
 
-    def get_vectorized_df(self):
+    text_set: pandas.Dataframe()
+    """
+
+    def __init__(self, text_set: pandas.DataFrame):
+        self.text_data = text_set
+
+    def get_dataframe(self):
+        return self.text_data
+
+    def encode_categorical_documents(self, category):
         """
         Function vectorizes text data using 
         TF / IDF vectors and then add new columns to dataframe
         with their respective frequencies for each given document
         """
-        vectorized = self.vectorizer.fit_transform(
-            raw_documents=self.text_data["label"]
+        vectorizer = text.TfidfVectorizer(
+            stop_words='english', 
+            max_features=200,
+            min_df=0.2,
+            lowercase=True
         )
-        for idx, field in enumerate(self.vectorizer.get_feature_names_out()):
+
+        category_data = self.text_data.loc[self.text_data['category'] == category, :]
+        vectorized = vectorizer.fit_transform(
+            raw_documents=category_data["label"]
+        )
+        for idx, field in enumerate(vectorizer.get_feature_names_out()):
             self.text_data[field] = vectorized[:, idx].toarray()
-        return self.text_data
