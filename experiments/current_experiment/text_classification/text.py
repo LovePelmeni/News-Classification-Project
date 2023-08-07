@@ -5,8 +5,6 @@ from transformers import AutoConfig, AutoTokenizer, AutoModel
 import typing 
 import logging 
 import os
-import pandas 
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 logger = logging.getLogger(__name__)
 file_handler = logging.FileHandler(
@@ -114,22 +112,3 @@ class BertTextClassifier(nn.Module):
         pooled_output = self.dropout(pooled_output)  
         logits = self.classifier(pooled_output)
         return logits
-
-class TFIDFVectorizedDataset(dict):
-
-    def __init__(self, text_data: pandas.DataFrame):
-        self.text_data = text_data 
-        self.vectorizer = TfidfVectorizer(stop_words='english')
-
-    def get_vectorized_df(self):
-        """
-        Function vectorizes text data using 
-        TF / IDF vectors and then add new columns to dataframe
-        with their respective frequencies for each given document
-        """
-        vectorized = self.vectorizer.fit_transform(
-            raw_documents=self.text_data["label"]
-        )
-        for idx, field in enumerate(self.vectorizer.get_feature_names_out()):
-            self.text_data[field] = vectorized[:, idx].toarray()
-        return self.text_data
