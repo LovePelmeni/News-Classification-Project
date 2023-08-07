@@ -122,12 +122,14 @@ class TFIDFVectorizedDataset(dict):
         self.vectorizer = TfidfVectorizer(stop_words='english')
 
     def get_vectorized_df(self):
-        try:
-            encoded = self.vectorizer.fit_transform(
-                raw_documents=self.text_data,
-                lowercase=True
-            )
-            return encoded.toarray() 
-        except Exception as encode_err:
-            logger.debug(encode_err) 
-            raise EncodeError(msg=encode_err.args)
+        """
+        Function vectorizes text data using 
+        TF / IDF vectors and then add new columns to dataframe
+        with their respective frequencies for each given document
+        """
+        vectorized = self.vectorizer.fit_transform(
+            raw_documents=self.text_data["label"]
+        )
+        for idx, field in enumerate(self.vectorizer.get_feature_names_out()):
+            self.text_data[field] = vectorized[:, idx].toarray()
+        return self.text_data

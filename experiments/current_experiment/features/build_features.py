@@ -48,7 +48,7 @@ def __construct_average_headline_and_description_lengths(news_applications: pand
         averages, on='category'
     )
 
-def __construct_popular_weekday(news_applications):
+def __construct_popular_weekday(news_applications: pandas.DataFrame):
     """
     Finds most popular day to publish article
     based on category
@@ -57,10 +57,8 @@ def __construct_popular_weekday(news_applications):
         lambda item: pandas.to_datetime(item).weekday()
     )
 
-    most_freq_weekdays = news_applications.groupby('category').agg(
-        popular_weekday=('weekday', pandas.Series.mode)
-    ).reset_index()
-
+    most_freq_weekdays = news_applications.groupby(
+    'category')['weekday'].apply(pandas.Series.mode).to_frame("popular_weekday")
     return news_applications.merge(most_freq_weekdays, on='category')
 
 
