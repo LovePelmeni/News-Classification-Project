@@ -1,0 +1,4 @@
+apiVersion: v1
+kind: StatefulSet 
+namespace:
+  - name: ml_namespace

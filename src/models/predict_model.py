@@ -36,4 +36,3 @@ nn_model = ""
 
 baseline_predictor = NewsPredictionModel(model=baseline_model)
 nn_predictor = NewsPredictionModel(model=nn_model)
-

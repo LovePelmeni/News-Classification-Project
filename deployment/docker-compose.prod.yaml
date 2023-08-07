@@ -39,8 +39,4 @@ services:
       - news_classification_network
     ports:
       - "5432:5432"
-
-  pg_admin:
-    container_name: pg_admin 
-    image: 
     
