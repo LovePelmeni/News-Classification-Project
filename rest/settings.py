@@ -6,6 +6,14 @@ file_handler = logging.FileHandler(
     filename=definitions.ROOT_DIR + "/logs/settings.log")
 logger.addHandler(file_handler)
 
+
+try:
+    open("../experiments/current_experiment/models/baseline_classifier.pkl", mode='rb')
+except(FileNotFoundError) as model_file_err:
+    raise SystemExit(
+        "ML Model File does not exist"
+    )
+
 try:
     import fastapi
     import os

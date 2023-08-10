@@ -37,7 +37,9 @@ class TFIDFVectorizedDataset(dict):
             lowercase=True
         )
 
-        category_data = self.text_data.loc[self.text_data['category'] == category, :]
+        category_data = self.text_data.loc[
+            self.text_data['category'] == category, :
+        ]
 
         vectorized = vectorizer.fit_transform(
             raw_documents=category_data["label"]
@@ -45,14 +47,11 @@ class TFIDFVectorizedDataset(dict):
 
         feature_word_names = vectorizer.get_feature_names_out()
         words_freqs = numpy.column_stack(tup=vectorized)
+
         feature_word_set = pandas.DataFrame(
-            {
-                field: word_freqs
-                for field, word_freqs in zip(
-                    feature_word_names, words_freqs
-                )
-            }
+            dict(zip(feature_word_names, words_freqs))
         )
+
         self.text_data = pandas.concat([
             self.text_data,
             feature_word_set
