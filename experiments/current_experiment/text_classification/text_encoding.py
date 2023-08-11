@@ -32,8 +32,8 @@ class TFIDFVectorizedDataset(dict):
 
         vectorizer = text.TfidfVectorizer(
             stop_words='english', 
-            max_features=200,
-            min_df=0.01,
+            max_features=50,
+            min_df=0.1,
             lowercase=True
         )
 
