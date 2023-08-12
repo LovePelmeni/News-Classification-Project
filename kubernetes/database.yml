@@ -1,4 +1,40 @@
 apiVersion: v1
+kind: Service 
+metadata:
+  name: db-service 
+  namespace: ml-namespace 
+spec:
+  labels:
+    app: ml-app
+  ports:
+    - name: http 
+      port: 5000
+      targetPort: 5432
+
+---
+
+apiVersion: v1
 kind: StatefulSet 
 namespace:
   - name: ml_namespace
+spec:
+  selector:
+    matchLabels:
+      app: db-app
+  template:
+    labels:
+      app: db-app
+    spec:
+      containers:
+        - name: db-container 
+          image: postgres:latest
+          ports:
+            - name: http 
+              containerPort: 5432
+              targetPort: 5432
+              protocol: TCP 
+          envFrom:
+            secretRef:
+              - name: db-application-map
+          imagePullPolicy: IfNotPresent 
+          terminationGracePeriodSeconds: 60 
