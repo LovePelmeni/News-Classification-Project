@@ -241,6 +241,7 @@ def compare_num_feature_relations(imp_feature: pandas.Series, target: pandas.Ser
 
     kl_div = numpy.sum(
         target_distribution * (
-            numpy.log(target_distribution / feature_distribution))
+            numpy.log(target_distribution / feature_distribution)
+        )
     )
     return kl_div

@@ -1,5 +1,6 @@
 from src.feature_form import feature_form
 from src.models import predict_model
+
 import logging
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request

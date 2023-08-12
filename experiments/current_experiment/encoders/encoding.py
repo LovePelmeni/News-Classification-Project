@@ -1,8 +1,7 @@
 import pandas
 from src.encoders import encoders
-import category_encoders as ct
 from experiments.current_experiment.text_classification import text_encoding
-
+from sklearn.preprocessing import LabelEncoder
 
 class DatasetEncoder(encoders.BaseDatasetEncoder):
 
@@ -32,18 +31,12 @@ class DatasetEncoder(encoders.BaseDatasetEncoder):
 
         Returns:
             Pandas Dataframe with encoded target variable
-        """ 
-        encoded_hot = self.__get_one_hot_encoded(dataset)
-        categories = dataset['category'].unique()
-
-        X = pandas.DataFrame()
-        X_data = encoded_hot.select_dtypes(include='object')
-
-        for category in categories:
-            encoder = ct.TargetEncoder(smoothing=0)
-            data = encoder.fit_transform(X_data, encoded_hot[category])
-            X = pandas.concat([X, data], axis=1)
-        return X
+        """
+        encoder = LabelEncoder()
+        encoded_labels = encoder.fit_transform(
+            y=dataset['category'].to_numpy().reshape(-1, 1)
+        )
+        return encoded_labels
 
     def encode_words(self, dataset: pandas.DataFrame) -> pandas.DataFrame:
         """
@@ -59,13 +52,3 @@ class DatasetEncoder(encoders.BaseDatasetEncoder):
                 category=category
             )
         return encoded_dataset.get_dataframe()
-
-    @staticmethod
-    def __get_one_hot_encoded(dataset: pandas.DataFrame) -> pandas.DataFrame:
-        """
-        Function returns one-hot encoded representation of the dataset
-        """
-        enc_data = pandas.get_dummies(dataset['category'])
-        return pandas.concat([dataset, enc_data], axis=1)
-
-
