@@ -5,7 +5,7 @@ import numpy
 
 warnings.filterwarnings('ignore')
 
-class TFIDFVectorizedDataset(dict):
+class TFIDFVectorizedDataset(object):
 
     """
     Class used for vectorizing key words for provided category 
@@ -16,9 +16,11 @@ class TFIDFVectorizedDataset(dict):
 
     def __init__(self, text_set: pandas.DataFrame):
         self.text_data = text_set
+        self.output_data: pandas.DataFrame = pandas.DataFrame(index=text_set.index)
 
     def get_dataframe(self):
-        return self.text_data
+        self.output_data.fillna(value=0, inplace=True)
+        return self.output_data
 
     def encode_categorical_documents(self, category):
         """
@@ -26,33 +28,24 @@ class TFIDFVectorizedDataset(dict):
         TF / IDF vectors and then add new columns to dataframe
         with their respective frequencies for each given document
         """
-
         if category not in self.text_data['category'].unique(): 
-            return 
+            raise ValueError("Invalid Category %s" % category)
 
         vectorizer = text.TfidfVectorizer(
             stop_words='english', 
-            max_features=50,
-            min_df=0.1,
-            lowercase=True
+            max_features=200,
+            min_df=0.07,
+            lowercase=True,
+            ngram_range=(1, 3),
+            use_idf=True
         )
 
-        category_data = self.text_data.loc[
-            self.text_data['category'] == category, :
-        ]
-
+        category_data = self.text_data[self.text_data['category'] == category]
         vectorized = vectorizer.fit_transform(
             raw_documents=category_data["label"]
         ).toarray()
 
-        feature_word_names = vectorizer.get_feature_names_out()
-        words_freqs = numpy.column_stack(tup=vectorized)
-
-        feature_word_set = pandas.DataFrame(
-            dict(zip(feature_word_names, words_freqs))
-        )
-
-        self.text_data = pandas.concat([
-            self.text_data,
-            feature_word_set
-        ], axis=1)
+        labels = vectorizer.get_feature_names_out()
+        feature_df = numpy.column_stack(vectorized)
+        new_text_data = pandas.DataFrame(dict(zip(labels, feature_df)))
+        self.output_data = pandas.concat([self.output_data, new_text_data], axis=1)

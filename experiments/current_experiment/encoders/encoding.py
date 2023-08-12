@@ -1,7 +1,8 @@
 import pandas
 from src.encoders import encoders
 from experiments.current_experiment.text_classification import text_encoding
-from sklearn.preprocessing import LabelEncoder
+from experiments.current_experiment.text_classification import constants
+import numpy
 
 class DatasetEncoder(encoders.BaseDatasetEncoder):
 
@@ -15,28 +16,41 @@ class DatasetEncoder(encoders.BaseDatasetEncoder):
         Returns:
             encoded dataset (pandas.DataFrame)
         """
-        rest_fields = dataset.select_dtypes(exclude='object')
-        target_encodings = self.encode_target_variable(dataset)
-        word_encodings = self.encode_words(dataset)
-        result = pandas.concat([rest_fields, target_encodings, word_encodings], axis=1)
+        if dataset.shape[0] == 0:
+            raise ValueError("Dataset does not have any records")
+
+        if len(dataset.columns) == 0:
+            raise ValueError("Dataset does not have any columns")
+
+        rest_fields = dataset.select_dtypes(exclude='object').drop(columns=['category']) # filtering rest fields
+        target_encodings = self.encode_target_variable(dataset) # encoding target variable
+        word_encodings = self.encode_words(dataset) # encoding text data using TF/IDF Vectorization
+        result = pandas.concat([rest_fields, target_encodings, word_encodings], axis=1) # merging everything back into new dataframe
         return result
 
     def encode_target_variable(self, dataset: pandas.DataFrame) -> pandas.DataFrame:
         """
-        Function encodes target variable using combination of 
-        One-Hot and Target Encodings
+        Function encodes target variable using standard Label Encoding
+        technique
 
-        Args: 
-            dataset (pandas.DataFrame) - dataset, that contains target variable 
+        Args:
+            dataset (pandas.DataFrame) -> dataset, that contains target variable
 
         Returns:
-            Pandas Dataframe with encoded target variable
+            pandas.DataFrame object with encoded target variable
         """
-        encoder = LabelEncoder()
-        encoded_labels = encoder.fit_transform(
-            y=dataset['category'].to_numpy().reshape(-1, 1)
+        if 'category' not in dataset.columns:
+            raise ValueError("Target variable is not presented in the dataset")
+
+        enc_data = pandas.DataFrame(
+            {
+                'category': dataset['category'].copy()
+            }
         )
-        return encoded_labels
+        enc_data['category'] = enc_data['category'].map(
+            constants.TARGET_VAR_CATEGORIES
+        ).astype(numpy.int8)
+        return enc_data
 
     def encode_words(self, dataset: pandas.DataFrame) -> pandas.DataFrame:
         """
@@ -52,3 +66,4 @@ class DatasetEncoder(encoders.BaseDatasetEncoder):
                 category=category
             )
         return encoded_dataset.get_dataframe()
+
