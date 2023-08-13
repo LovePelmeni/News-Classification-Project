@@ -49,3 +49,4 @@ class TFIDFVectorizedDataset(object):
         feature_df = numpy.column_stack(vectorized)
         new_text_data = pandas.DataFrame(dict(zip(labels, feature_df)))
         self.output_data = pandas.concat([self.output_data, new_text_data], axis=1)
+

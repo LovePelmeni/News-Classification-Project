@@ -298,25 +298,6 @@ profiler = ["torch-tb-profiler"]
 wandb = ["wandb"]
 
 [[package]]
-name = "category-encoders"
-version = "2.6.1"
-description = "A collection of sklearn transformers to encode categorical variables as numeric"
-optional = false
-python-versions = "*"
-files = [
-    {file = "category_encoders-2.6.1-py2.py3-none-any.whl", hash = "sha256:d2b1d366ba1164ea1bc3bb1ddfa42c635a17c8991d1a4ba5e63d944ea2121845"},
-    {file = "category_encoders-2.6.1.tar.gz", hash = "sha256:59eba46127c2ce4cd31e0177e0a55792090b7b2a0e6f50517a27e1f2251d7622"},
-]
-
-[package.dependencies]
-numpy = ">=1.14.0"
-pandas = ">=1.0.5"
-patsy = ">=0.5.1"
-scikit-learn = ">=0.20.0"
-scipy = ">=1.0.0"
-statsmodels = ">=0.9.0"
-
-[[package]]
 name = "certifi"
 version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -3815,4 +3796,4 @@ pillow = "*"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "430b66ff34531f8f523b2629c768be2c962b2c8f71405870d1c3b142370f1728"
+content-hash = "b66b067a9986e50da23984d9008312804990576550925c040066c5ec09969e2d"
