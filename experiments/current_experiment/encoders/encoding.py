@@ -66,4 +66,3 @@ class DatasetEncoder(encoders.BaseDatasetEncoder):
                 category=category
             )
         return encoded_dataset.get_dataframe()
-
