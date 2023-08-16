@@ -1,0 +1,39 @@
+name: News-Classification-Continious-Integration-Pipeline 
+
+# Specifying CI Availability 
+
+on:
+  push:
+    branches: [ "main" ]
+
+# Setting permissions
+permissions:
+  contents: 'read'
+
+# Defining Docker Deployment Job Runner 
+
+jobs:
+  docker_deployment:
+    env:
+      NEWS_DOCKER_IMAGE_TAG: crazycoderrr/news_classification_project:latest 
+      NEWS_DOCKER_COMPOSE_APP_NAME: deployment_news_application
+
+    runs-on: ubuntu:latest 
+    timeout-minutes: 5
+
+    steps:
+      - name: Logging to Dockerhub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: deployment 
+        run: | 
+          cd deployment 
+          docker-compose up -d
+          
+      - name: pushing new docker build
+        run: |
+          docker tag ${{ env.NEWS_DOCKER_COMPOSE_APP_NAME }} ${{ env.NEWS_DOCKER_IMAGE_TAG }}
+          docker push ${{ env.NEWS_DOCKER_IMAGE_TAG }}
