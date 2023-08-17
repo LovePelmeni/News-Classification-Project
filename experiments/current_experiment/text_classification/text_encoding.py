@@ -1,10 +1,13 @@
 import pandas
 from sklearn.feature_extraction import text
+
 import warnings 
 import numpy
 
-warnings.filterwarnings('ignore')
+from sklearn.manifold import TSNE
+from text_classification import constants
 
+warnings.filterwarnings('ignore')
 class TFIDFVectorizedDataset(object):
 
     """
@@ -20,7 +23,20 @@ class TFIDFVectorizedDataset(object):
 
     def get_dataframe(self):
         self.output_data.fillna(value=0, inplace=True)
+        self.output_data = self.__reduce_dims(dataset=self.output_data)
         return self.output_data
+
+    def __reduce_dims(self, dataset: pandas.DataFrame):
+        """
+        Function reduces number of dimensions in the text data 
+        Args:
+            dataset (pandas.DataFrame) - dataset, containing text data
+        """
+        tsne = TSNE(n_components=constants.N_TSNE_COMPONENTS, random_state=True)
+        reduced = pandas.DataFrame(
+            tsne.fit_transform(dataset), columns=['x', 'y']
+        )
+        return reduced
 
     def encode_categorical_documents(self, category):
         """
